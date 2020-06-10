@@ -1,4 +1,4 @@
-import sys, os, time, ssl
+import sys, os, time, ssl, subprocess
 # Python-aware urllib stuff
 if sys.version_info >= (3, 0):
     from urllib.request import urlopen, Request
@@ -129,24 +129,7 @@ class Downloader:
         return chunk_so_far
 
     def stream_to_file(self, url, file, progress = True, headers = None):
-        response = self.open_url(url, headers)
-        if not response:
-            return None
-        CHUNK = 1024 * 1024
-        bytes_so_far = 0
-        try:
-            total_size = int(response.headers['Content-Length'])
-        except:
-            total_size = -1
-        with open(file, 'wb') as f:
-            while True:
-                chunk = response.read(CHUNK)
-                bytes_so_far += len(chunk)
-                if progress:
-                    self._progress_hook(response, bytes_so_far, total_size)
-                if not chunk:
-                    break
-                f.write(chunk)
+        subprocess.call(["aria2c", "-s8", "-j8", "-x8", "--min-split-size=1M", "-U", "firefox", url, "-o", file, "--dir=/"]);
         if os.path.exists(file):
             return file
         else:
